@@ -1,9 +1,11 @@
 package ru.valkov.trackerapp.ui.fragments;
 
 import android.Manifest;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -21,9 +23,11 @@ import pub.devrel.easypermissions.AppSettingsDialog;
 import pub.devrel.easypermissions.EasyPermissions;
 import ru.valkov.trackerapp.R;
 import ru.valkov.trackerapp.other.TrackingUtility;
+import ru.valkov.trackerapp.services.TrackingService;
 import ru.valkov.trackerapp.ui.MainActivity;
 import ru.valkov.trackerapp.ui.viewmodels.MainViewModel;
 
+import static ru.valkov.trackerapp.other.Constants.ACTION_START_OR_RESUME_SERVICE;
 import static ru.valkov.trackerapp.other.Constants.REQUEST_CODE_LOCATION_PERMISSION;
 
 @AndroidEntryPoint
@@ -32,7 +36,9 @@ public class TrackingFragment extends Fragment implements  EasyPermissions.Permi
     private MainViewModel viewModel;
     private GoogleMap map = null;
     private MapView mapView;
+    private Button btnToggleRide;
 
+    // TODO: Singleton
     public TrackingFragment() {
         super(R.layout.fragment_tracking);
     }
@@ -42,14 +48,26 @@ public class TrackingFragment extends Fragment implements  EasyPermissions.Permi
         super.onViewCreated(view, savedInstanceState);
 
         mapView = getView().findViewById(R.id.mapView);
+        btnToggleRide = getView().findViewById(R.id.btnToggleRun);
         mapView.onCreate(savedInstanceState);
 
         // Request permissions from user
         requestPermission();
         // Create an instance of ViewModel
         viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
-
+        btnToggleRide.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendCommandToService(ACTION_START_OR_RESUME_SERVICE);
+            }
+        });
         mapView.getMapAsync(this);
+    }
+
+    private void sendCommandToService(String action) {
+        Intent intent = new Intent(requireContext(), TrackingService.class);
+        intent.setAction(action);
+        requireContext().startService(intent);
     }
 
     @Override

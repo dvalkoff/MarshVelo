@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
 
         try {
             getSupportActionBar().hide();
-        } catch (NullPointerException e) {  }
+        } catch (NullPointerException e) { }
 
         ft = getSupportFragmentManager().beginTransaction();
         currentFragment = new TrackingFragment();
@@ -48,28 +48,22 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-
+            currentFragment = null;
             switch (item.getItemId()) {
                 case R.id.fragment_tracking:
                     currentFragment = new TrackingFragment();
-                    ft = getSupportFragmentManager().beginTransaction();
-                    ft.replace(R.id.flFragment, currentFragment);
-                    ft.commit();
-                    return true;
+                    break;
                 case R.id.fragment_statistics:
                     currentFragment = new StatisticsFragment();
-                    ft = getSupportFragmentManager().beginTransaction();
-                    ft.replace(R.id.flFragment, currentFragment);
-                    ft.commit();
-                    return true;
+                    break;
                 case R.id.fragment_bluetooth:
                     currentFragment = new BluetoothFragment();
-                    ft = getSupportFragmentManager().beginTransaction();
-                    ft.replace(R.id.flFragment, currentFragment);
-                    ft.commit();
-                    return true;
+                    break;
             }
-
+            if (currentFragment != null) {
+                getSupportFragmentManager().beginTransaction().replace(R.id.flFragment, currentFragment).commit();
+                return true;
+            }
             return false;
         }
 
