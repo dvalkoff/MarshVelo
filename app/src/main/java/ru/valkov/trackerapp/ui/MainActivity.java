@@ -1,9 +1,7 @@
 package ru.valkov.trackerapp.ui;
 
 import androidx.appcompat.app.AppCompatActivity;
-
 import android.os.Bundle;
-import android.util.Log;
 
 import javax.inject.Inject;
 
