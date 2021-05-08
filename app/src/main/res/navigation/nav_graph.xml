@@ -4,15 +4,15 @@
     app:startDestination="@id/trackingFragment">
 
     <fragment
-        android:id="@+id/bluetoothFragment"
-        android:name="ru.valkov.trackerapp.ui.fragments.BluetoothFragment"
-        android:label="BluetoothFragment" />
+        android:id="@+id/trackingFragment"
+        android:name="ru.valkov.trackerapp.ui.fragments.TrackingFragment"
+        android:label="TrackingFragment" />
     <fragment
         android:id="@+id/statisticsFragment"
         android:name="ru.valkov.trackerapp.ui.fragments.StatisticsFragment"
         android:label="StatisticsFragment" />
     <fragment
-        android:id="@+id/trackingFragment"
-        android:name="ru.valkov.trackerapp.ui.fragments.TrackingFragment"
-        android:label="TrackingFragment" />
+        android:id="@+id/bluetoothFragment"
+        android:name="ru.valkov.trackerapp.ui.fragments.BluetoothFragment"
+        android:label="BluetoothFragment" />
 </navigation>
