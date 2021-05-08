@@ -8,4 +8,12 @@
         <item>Average Speed</item>
         <item>Calories Burned</item>
     </string-array>
+
+    <string name="ride">ride</string>
+    <string name="stats">stats</string>
+    <string name="share">share</string>
+    <string name="listen">listen</string>
+    <string name="list">list</string>
+    <string name="status">Status</string>
+
 </resources>
