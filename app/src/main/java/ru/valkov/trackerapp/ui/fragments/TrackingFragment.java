@@ -27,11 +27,11 @@ import ru.valkov.trackerapp.ui.viewmodels.MainViewModel;
 import static ru.valkov.trackerapp.other.Constants.REQUEST_CODE_LOCATION_PERMISSION;
 
 @AndroidEntryPoint
-public class TrackingFragment extends Fragment implements  EasyPermissions.PermissionCallbacks {
+public class TrackingFragment extends Fragment implements  EasyPermissions.PermissionCallbacks, OnMapReadyCallback {
 
     private MainViewModel viewModel;
-    // private GoogleMap map = null;
-    // private MapView mapView;
+    private GoogleMap map = null;
+    private MapView mapView;
 
     public TrackingFragment() {
         super(R.layout.fragment_tracking);
@@ -40,21 +40,18 @@ public class TrackingFragment extends Fragment implements  EasyPermissions.Permi
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        /*
+
         mapView = getView().findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
-
-         */
 
         // Request permissions from user
         requestPermission();
         // Create an instance of ViewModel
         viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
 
-        // mapView.getMapAsync(this);
+        mapView.getMapAsync(this);
     }
 
-    /*
     @Override
     public void onResume() {
         super.onResume();
@@ -96,7 +93,6 @@ public class TrackingFragment extends Fragment implements  EasyPermissions.Permi
         map = googleMap;
     }
 
-     */
 
     @AfterPermissionGranted(REQUEST_CODE_LOCATION_PERMISSION)
     private void requestPermission() {
