@@ -35,12 +35,12 @@ import java.util.UUID;
 import dagger.hilt.android.AndroidEntryPoint;
 import ru.valkov.trackerapp.R;
 import ru.valkov.trackerapp.ui.viewmodels.BluetoothViewModel;
-import ru.valkov.trackerapp.ui.viewmodels.StatisticsViewModel;
 
 @AndroidEntryPoint
 public class BluetoothFragment extends Fragment {
 
     private BluetoothViewModel viewModel;
+
     // TODO: Singleton
     public BluetoothFragment() {
         super(R.layout.fragment_bluetooth);
@@ -54,7 +54,7 @@ public class BluetoothFragment extends Fragment {
     BluetoothAdapter bluetoothAdapter;
     BluetoothDevice[] btArray;
 
-    SendReceive sendReceive;
+    // SendReceive sendReceive;
 
     static final int STATE_LISTENING = 1;
     static final int STATE_CONNECTING = 2;
@@ -65,29 +65,24 @@ public class BluetoothFragment extends Fragment {
     int REQUEST_ENABLE_BLUETOOTH = 1;
 
     private static final String APP_NAME = "BTChat";
-    private static final UUID MY_UUID=UUID.fromString("8ce255c0-223a-11e0-ac64-0803450c9a66");
+    private static final UUID MY_UUID = UUID.fromString("8ce255c0-223a-11e0-ac64-0803450c9a66");
 
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         viewModel = new ViewModelProvider(this).get(BluetoothViewModel.class);
         super.onCreate(savedInstanceState);
 
-        findViewByIdes(getView());
+        // findViewByIdes(getView());
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
-        if( ! bluetoothAdapter.isEnabled() )
-        {
+        if (!bluetoothAdapter.isEnabled()) {
             Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableIntent,REQUEST_ENABLE_BLUETOOTH);
+            startActivityForResult(enableIntent, REQUEST_ENABLE_BLUETOOTH);
         }
 
-        implementListeners();
+        // implementListeners();
 
-
-
-
-
-
+        /*
 
         // shit
 
@@ -151,6 +146,7 @@ public class BluetoothFragment extends Fragment {
         states.add(new State ("Уругвай", "Монтевидео", R.drawable.uruguai));
         states.add(new State ("Чили", "Сантьяго", R.drawable.chile));
     }*/
+
 
     private void implementListeners() {
 
@@ -370,5 +366,8 @@ public class BluetoothFragment extends Fragment {
                 e.printStackTrace();
             }
         }
+    }
+
+         */
     }
 }
