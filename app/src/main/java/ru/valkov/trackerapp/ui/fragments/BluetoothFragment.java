@@ -91,7 +91,7 @@ public class BluetoothFragment extends Fragment {
 
         // shit
 
-        class StateAdapter  extends RecyclerView.Adapter<StateAdapter.ViewHolder>{
+        /*class StateAdapter  extends RecyclerView.Adapter<StateAdapter.ViewHolder>{
 
             private final LayoutInflater inflater;
             private final List<RecyclerView.State> states;
@@ -140,17 +140,17 @@ public class BluetoothFragment extends Fragment {
         // создаем адаптер
         StateAdapter adapter = new StateAdapter(this, states);
         // устанавливаем для списка адаптер
-        recyclerView.setAdapter(adapter);
+        recyclerView.setAdapter(adapter);*/
     }
 
-    private void setInitialData(){
+    /*private void setInitialData(){
 
         states.add(new State ("Бразилия", "Бразилиа", R.drawable.brazilia));
         states.add(new State ("Аргентина", "Буэнос-Айрес", R.drawable.argentina));
         states.add(new State ("Колумбия", "Богота", R.drawable.columbia));
         states.add(new State ("Уругвай", "Монтевидео", R.drawable.uruguai));
         states.add(new State ("Чили", "Сантьяго", R.drawable.chile));
-    }
+    }*/
 
     private void implementListeners() {
 
