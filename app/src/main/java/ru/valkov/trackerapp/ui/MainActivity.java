@@ -43,8 +43,8 @@ public class MainActivity extends AppCompatActivity {
         ft.replace(R.id.flFragment, currentFragment);
         ft.commit();
 
-        BottomNavigationView navigation = (BottomNavigationView)
-                findViewById(R.id.bottomNavigationView); navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+        BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.bottomNavigationView);
+        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
     }
 
@@ -62,7 +62,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener = new BottomNavigationView.OnNavigationItemSelectedListener(){
-
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             currentFragment = null;
@@ -83,6 +82,5 @@ public class MainActivity extends AppCompatActivity {
             }
             return false;
         }
-
     };
 }

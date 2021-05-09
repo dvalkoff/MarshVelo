@@ -123,10 +123,10 @@ public class TrackingFragment extends Fragment implements  EasyPermissions.Permi
         if (!pathPoints.isEmpty() && !pathPoints.get(pathPoints.size() - 1).isEmpty()) {
             if (map != null) {
                 ArrayList<LatLng> polyline = pathPoints.get(pathPoints.size() - 1);
-                CameraUpdateFactory.newLatLngZoom(
+                map.animateCamera(CameraUpdateFactory.newLatLngZoom(
                         polyline.get(polyline.size() - 1),
                         MAP_ZOOM
-                );
+                ));
             }
         }
     }
@@ -144,9 +144,7 @@ public class TrackingFragment extends Fragment implements  EasyPermissions.Permi
     }
     private void addLatestPolyline() {
         if (!pathPoints.isEmpty()) {
-            // ArrayList<ArrayList<LatLng>>
             ArrayList<LatLng> polyline = pathPoints.get(pathPoints.size() - 1);
-            // ArrayList<LatLng>
             if (polyline.size() > 1) {
                 LatLng preLastLng = polyline.get(polyline.size() - 2);
                 LatLng lastLng = polyline.get(polyline.size() - 1);
