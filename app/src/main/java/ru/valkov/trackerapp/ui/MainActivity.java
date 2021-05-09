@@ -1,6 +1,8 @@
 package ru.valkov.trackerapp.ui;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 import androidx.annotation.NonNull;
@@ -17,6 +19,8 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import static ru.valkov.trackerapp.other.Constants.ACTION_SHOW_TRACKING_FRAGMENT;
+
 @AndroidEntryPoint
 public class MainActivity extends AppCompatActivity {
 
@@ -32,6 +36,8 @@ public class MainActivity extends AppCompatActivity {
             getSupportActionBar().hide();
         } catch (NullPointerException e) { }
 
+        navigateToTrackingFragmentIfNeed(getIntent());
+
         ft = getSupportFragmentManager().beginTransaction();
         currentFragment = new TrackingFragment();
         ft.replace(R.id.flFragment, currentFragment);
@@ -42,7 +48,18 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        navigateToTrackingFragmentIfNeed(intent);
+    }
 
+    private void navigateToTrackingFragmentIfNeed(Intent intent) {
+        if (intent.getAction() == ACTION_SHOW_TRACKING_FRAGMENT) {
+            currentFragment = new TrackingFragment();
+            getSupportFragmentManager().beginTransaction().replace(R.id.flFragment, currentFragment).commit();
+        }
+    }
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener = new BottomNavigationView.OnNavigationItemSelectedListener(){
 
