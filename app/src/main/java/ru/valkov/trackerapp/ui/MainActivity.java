@@ -1,33 +1,25 @@
 package ru.valkov.trackerapp.ui;
 
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
-
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-
-
-
-
-import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import ru.valkov.trackerapp.R;
-import ru.valkov.trackerapp.database.RideDAO;
 import ru.valkov.trackerapp.ui.fragments.BluetoothFragment;
 import ru.valkov.trackerapp.ui.fragments.StatisticsFragment;
 import ru.valkov.trackerapp.ui.fragments.TrackingFragment;
-import timber.log.Timber;
 
 
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-import androidx.navigation.fragment.NavHostFragment;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+
+import static ru.valkov.trackerapp.other.Constants.ACTION_SHOW_TRACKING_FRAGMENT;
 
 @AndroidEntryPoint
 public class MainActivity extends AppCompatActivity {
@@ -40,6 +32,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        try {
+            getSupportActionBar().hide();
+        } catch (NullPointerException e) { }
+
+        navigateToTrackingFragmentIfNeed(getIntent());
 
         ft = getSupportFragmentManager().beginTransaction();
         currentFragment = new TrackingFragment();
@@ -51,35 +48,41 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        navigateToTrackingFragmentIfNeed(intent);
+    }
 
+    private void navigateToTrackingFragmentIfNeed(Intent intent) {
+        if (intent.getAction() == ACTION_SHOW_TRACKING_FRAGMENT) {
+            currentFragment = new TrackingFragment();
+            getSupportFragmentManager().beginTransaction().replace(R.id.flFragment, currentFragment).commit();
+        }
+    }
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener = new BottomNavigationView.OnNavigationItemSelectedListener(){
 
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-
+            currentFragment = null;
             switch (item.getItemId()) {
                 case R.id.fragment_tracking:
                     currentFragment = new TrackingFragment();
-                    ft = getSupportFragmentManager().beginTransaction();
-                    ft.replace(R.id.flFragment, currentFragment);
-                    ft.commit();
-                    return true;
+                    break;
                 case R.id.fragment_statistics:
                     currentFragment = new StatisticsFragment();
-                    ft = getSupportFragmentManager().beginTransaction();
-                    ft.replace(R.id.flFragment, currentFragment);
-                    ft.commit();
-                    return true;
+                    break;
                 case R.id.fragment_bluetooth:
                     currentFragment = new BluetoothFragment();
-                    ft = getSupportFragmentManager().beginTransaction();
-                    ft.replace(R.id.flFragment, currentFragment);
-                    ft.commit();
-                    return true;
+                    break;
             }
-
+            if (currentFragment != null) {
+                getSupportFragmentManager().beginTransaction().replace(R.id.flFragment, currentFragment).commit();
+                return true;
+            }
             return false;
         }
+
     };
 }

@@ -16,7 +16,7 @@ import ru.valkov.trackerapp.ui.viewmodels.StatisticsViewModel;
 public class StatisticsFragment extends Fragment {
 
     private StatisticsViewModel viewModel;
-
+    // TODO: Singleton
     public StatisticsFragment() {
         super(R.layout.fragment_statistics);
     }

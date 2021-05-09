@@ -35,7 +35,7 @@ import ru.valkov.trackerapp.ui.viewmodels.StatisticsViewModel;
 public class BluetoothFragment extends Fragment {
 
     private BluetoothViewModel viewModel;
-
+    // TODO: Singleton
     public BluetoothFragment() {
         super(R.layout.fragment_bluetooth);
     }
