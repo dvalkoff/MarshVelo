@@ -43,16 +43,25 @@ import static ru.valkov.trackerapp.other.Constants.REQUEST_CODE_LOCATION_PERMISS
 @AndroidEntryPoint
 public class TrackingFragment extends Fragment implements  EasyPermissions.PermissionCallbacks, OnMapReadyCallback {
 
+    private static TrackingFragment trackingFragment = null;
+
     private MainViewModel viewModel;
     private GoogleMap map = null;
     private MapView mapView;
     private Button btnToggleRide;
     private Button btnFinishRun;
 
-    private boolean isTracking = false;
-    private ArrayList<ArrayList<LatLng>> pathPoints = new ArrayList<>();
+    private static boolean isTracking = false;
+    private static ArrayList<ArrayList<LatLng>> pathPoints = new ArrayList<>();
 
-    // TODO: Singleton
+    // TODO: Singleton doesn't help :(
+    public static TrackingFragment getInstance() {
+        if (trackingFragment == null) {
+            trackingFragment = new TrackingFragment();
+        }
+        return trackingFragment;
+    }
+
     public TrackingFragment() {
         super(R.layout.fragment_tracking);
     }
@@ -74,7 +83,8 @@ public class TrackingFragment extends Fragment implements  EasyPermissions.Permi
         btnToggleRide.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                toggleRide();            }
+                toggleRide();
+            }
         });
         mapView.getMapAsync(this);
         addAllPolylines();
@@ -107,10 +117,10 @@ public class TrackingFragment extends Fragment implements  EasyPermissions.Permi
         }
     }
 
-    private void updateTracking(boolean isTracking) {
-        this.isTracking = isTracking;
+    private void updateTracking(boolean isTrack) {
+        isTracking = isTrack;
         if (!isTracking) {
-            btnToggleRide.setText("Pause");
+            btnToggleRide.setText("Resume");
             btnFinishRun.setVisibility(getView().VISIBLE);
             btnFinishRun.setText("Finish");
         } else {

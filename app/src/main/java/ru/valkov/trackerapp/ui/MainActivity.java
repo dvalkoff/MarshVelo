@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
             currentFragment = null;
             switch (item.getItemId()) {
                 case R.id.fragment_tracking:
-                    currentFragment = new TrackingFragment();
+                    currentFragment = TrackingFragment.getInstance();
                     break;
                 case R.id.fragment_statistics:
                     currentFragment = new StatisticsFragment();
