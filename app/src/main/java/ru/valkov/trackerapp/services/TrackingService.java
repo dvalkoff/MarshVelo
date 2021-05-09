@@ -103,13 +103,7 @@ public class TrackingService extends LifecycleService {
         return super.onStartCommand(intent, flags, startId);
     }
 
-    // TODO: it doesn't work correctly
     private void addEmptyPolyline() {
-        /*
-        ArrayList<ArrayList<LatLng>> value = new ArrayList<ArrayList<LatLng>>();
-        pathPoints.postValue(value);
-        Timber.d("TRACKING_SERVICE: empty PolyLine added");
-         */
         ArrayList polylines =  pathPoints.getValue();
         if (polylines != null) {
             polylines.add(new ArrayList<>());
@@ -118,58 +112,7 @@ public class TrackingService extends LifecycleService {
         }
     }
 
-    /*
-    Kotlin code:
-    private fun addEmptyPolyline() = pathPoints.value?.apply {
-        add(mutableListOf())
-        pathPoints.postValue(this)
-    } ?: pathPoints.postValue(mutableListOf(mutableListOf()))
-
-
-    Decompiled kotlin code:
-   private final Object addEmptyPolyline() {
-      List var10000 = (List)pathPoints.getValue();
-      Object var8;
-      if (var10000 != null) {
-         List var1 = var10000;
-         boolean var2 = false;
-         boolean var3 = false;
-         int var5 = false;
-         boolean var6 = false;
-         var1.add((List)(new ArrayList()));
-         pathPoints.postValue(var1);
-         var8 = var1;
-         if (var1 != null) {
-            return var8;
-         }
-      }
-
-      MutableLiveData var9 = pathPoints;
-      List[] var10001 = new List[1];
-      boolean var7 = false;
-      var10001[0] = (List)(new ArrayList());
-      var9.postValue(CollectionsKt.mutableListOf(var10001));
-      var8 = Unit.INSTANCE;
-      return var8;
-   }
-     */
-
-    // TODO: it doesn't add the location into MultipleLiveData
     private void addPathPoint(Location location) {
-        /*
-        Timber.d("TRACKING_SERVICE: trying to add path point");
-        LatLng pos = new LatLng(location.getLatitude(), location.getLongitude());
-        int lastIndex =  (pathPoints.getValue().size() > 0) ? pathPoints.getValue().size() - 1 : 0;
-        if (lastIndex < 1) {
-            Timber.e("TRACKING_SERVICE: Mutable LiveData is empty");
-            return;
-        }
-        ArrayList<LatLng> list = pathPoints.getValue().get(lastIndex);
-        pathPoints.getValue().get(lastIndex).add(pos);
-        // ???
-        pathPoints.notify();
-        Timber.d("TRACKING_SERVICE: path point is added");
-         */
         if (location != null) {
             Timber.d("TRACKING_SERVICE: trying to add path point");
             LatLng pos = new LatLng(location.getLatitude(), location.getLongitude());
@@ -182,38 +125,6 @@ public class TrackingService extends LifecycleService {
             }
         }
     }
-
-    /*
-    Kotlin code:
-     private fun addPathPoint(location: Location?) {
-        location?.let {
-            val pos = LatLng(location.latitude, location.longitude)
-            pathPoints.value?.apply {
-                last().add(pos)
-                pathPoints.postValue(this)
-            }
-        }
-    }
-
-    Decompiled kotlin code
-    private final void addPathPoint(Location location) {
-      if (location != null) {
-         boolean var3 = false;
-         boolean var4 = false;
-         int var6 = false;
-         LatLng pos = new LatLng(location.getLatitude(), location.getLongitude());
-         List var10000 = (List)pathPoints.getValue();
-         if (var10000 != null) {
-            List var8 = var10000;
-            boolean var9 = false;
-            boolean var10 = false;
-            int var12 = false;
-            ((List)CollectionsKt.last(var8)).add(pos);
-            pathPoints.postValue(var8);
-         }
-      }
-   }
-     */
 
     @SuppressLint("MissingPermission")
     private void updateLocationTracking(boolean isTracking) {
