@@ -4,25 +4,31 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -76,6 +82,74 @@ public class BluetoothFragment extends Fragment {
         }
 
         implementListeners();
+
+
+
+
+
+
+
+        // shit
+
+        class StateAdapter  extends RecyclerView.Adapter<StateAdapter.ViewHolder>{
+
+            private final LayoutInflater inflater;
+            private final List<RecyclerView.State> states;
+
+            StateAdapter(Context context, List<RecyclerView.State> states) {
+                this.states = states;
+                this.inflater = LayoutInflater.from(context);
+            }
+            @Override
+            public StateAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+
+                View view = inflater.inflate(R.layout.recycler_view_devices, parent, false);
+                return new ViewHolder(view);
+            }
+
+            @Override
+            public void onBindViewHolder(ViewHolder holder, int position) {
+                RecyclerView.State state = states.get(position);
+                holder.flagView.setImageResource(state.getFlagResource());
+                holder.nameView.setText(state.getName());
+                holder.capitalView.setText(state.getCapital());
+            }
+
+            @Override
+            public int getItemCount() {
+                return states.size();
+            }
+
+            class ViewHolder extends RecyclerView.ViewHolder {
+                final ImageView flagView;
+                final TextView nameView, capitalView;
+                ViewHolder(View view){
+                    super(view);
+                    flagView = (ImageView)view.findViewById(R.id.flag);
+                    nameView = (TextView) view.findViewById(R.id.textView1);
+                    capitalView = (TextView) view.findViewById(R.id.capital);
+                }
+            }
+        }
+
+
+
+        // начальная инициализация списка
+        setInitialData();
+        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.list);
+        // создаем адаптер
+        StateAdapter adapter = new StateAdapter(this, states);
+        // устанавливаем для списка адаптер
+        recyclerView.setAdapter(adapter);
+    }
+
+    private void setInitialData(){
+
+        states.add(new State ("Бразилия", "Бразилиа", R.drawable.brazilia));
+        states.add(new State ("Аргентина", "Буэнос-Айрес", R.drawable.argentina));
+        states.add(new State ("Колумбия", "Богота", R.drawable.columbia));
+        states.add(new State ("Уругвай", "Монтевидео", R.drawable.uruguai));
+        states.add(new State ("Чили", "Сантьяго", R.drawable.chile));
     }
 
     private void implementListeners() {
