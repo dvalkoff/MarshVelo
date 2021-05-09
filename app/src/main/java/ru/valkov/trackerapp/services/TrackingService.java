@@ -49,8 +49,8 @@ public class TrackingService extends LifecycleService {
 
     private static boolean isFirstRun = true;
 
-    private MutableLiveData<Boolean> isTracking = new MutableLiveData<>();
-    private MutableLiveData<ArrayList<ArrayList<LatLng>>> pathPoints = new MutableLiveData<>();
+    public static MutableLiveData<Boolean> isTracking = new MutableLiveData<>();
+    public static MutableLiveData<ArrayList<ArrayList<LatLng>>> pathPoints = new MutableLiveData<>();
     private FusedLocationProviderClient fusedLocationProviderClient;
 
     private void postInitialValues() {
@@ -74,6 +74,10 @@ public class TrackingService extends LifecycleService {
         });
     }
 
+    private void pauseService() {
+        isTracking.postValue(false);
+    }
+
     @Override
     public int onStartCommand(@Nullable Intent intent, int flags, int startId) {
         switch (intent.getAction()) {
@@ -83,10 +87,12 @@ public class TrackingService extends LifecycleService {
                     isFirstRun = false;
                     Timber.d("TRACKING_SERVICE: Start TrackingService");
                 } else {
+                    startForegroundService();
                     Timber.d("TRACKING_SERVICE: Resume service");
                 }
                 break;
             case ACTION_PAUSE_SERVICE:
+                pauseService();
                 Timber.d("TRACKING_SERVICE: ACTION_PAUSE_SERVICE");
                 break;
             case ACTION_STOP_SERVICE:

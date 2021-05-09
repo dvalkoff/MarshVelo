@@ -9,12 +9,18 @@ import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.PolylineOptions;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import dagger.hilt.android.AndroidEntryPoint;
@@ -27,7 +33,11 @@ import ru.valkov.trackerapp.services.TrackingService;
 import ru.valkov.trackerapp.ui.MainActivity;
 import ru.valkov.trackerapp.ui.viewmodels.MainViewModel;
 
+import static ru.valkov.trackerapp.other.Constants.ACTION_PAUSE_SERVICE;
 import static ru.valkov.trackerapp.other.Constants.ACTION_START_OR_RESUME_SERVICE;
+import static ru.valkov.trackerapp.other.Constants.MAP_ZOOM;
+import static ru.valkov.trackerapp.other.Constants.POLYLINE_COLOR;
+import static ru.valkov.trackerapp.other.Constants.POLYLINE_WIDTH;
 import static ru.valkov.trackerapp.other.Constants.REQUEST_CODE_LOCATION_PERMISSION;
 
 @AndroidEntryPoint
@@ -37,6 +47,10 @@ public class TrackingFragment extends Fragment implements  EasyPermissions.Permi
     private GoogleMap map = null;
     private MapView mapView;
     private Button btnToggleRide;
+    private Button btnFinishRun;
+
+    private boolean isTracking = false;
+    private ArrayList<ArrayList<LatLng>> pathPoints = new ArrayList<>();
 
     // TODO: Singleton
     public TrackingFragment() {
@@ -48,8 +62,10 @@ public class TrackingFragment extends Fragment implements  EasyPermissions.Permi
         super.onViewCreated(view, savedInstanceState);
 
         mapView = getView().findViewById(R.id.mapView);
-        btnToggleRide = getView().findViewById(R.id.btnToggleRun);
         mapView.onCreate(savedInstanceState);
+
+        btnToggleRide = getView().findViewById(R.id.btnToggleRun);
+        btnFinishRun = getView().findViewById(R.id.btnFinishRun);
 
         // Request permissions from user
         requestPermission();
@@ -58,10 +74,92 @@ public class TrackingFragment extends Fragment implements  EasyPermissions.Permi
         btnToggleRide.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendCommandToService(ACTION_START_OR_RESUME_SERVICE);
-            }
+                toggleRide();            }
         });
         mapView.getMapAsync(this);
+        addAllPolylines();
+
+        subscribeToObservers();
+    }
+
+    private void subscribeToObservers() {
+        TrackingService.isTracking.observe(getViewLifecycleOwner(), new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean aBoolean) {
+                updateTracking(aBoolean);
+            }
+        });
+        TrackingService.pathPoints.observe(getViewLifecycleOwner(), new Observer<ArrayList<ArrayList<LatLng>>>() {
+            @Override
+            public void onChanged(ArrayList<ArrayList<LatLng>> arrayLists) {
+                pathPoints = arrayLists;
+                addLatestPolyline();
+                moveCameraToUser();
+            }
+        });
+    }
+
+    private void toggleRide() {
+        if (isTracking) {
+            sendCommandToService(ACTION_PAUSE_SERVICE);
+        } else {
+            sendCommandToService(ACTION_START_OR_RESUME_SERVICE);
+        }
+    }
+
+    private void updateTracking(boolean isTracking) {
+        this.isTracking = isTracking;
+        if (!isTracking) {
+            btnToggleRide.setText("Pause");
+            btnFinishRun.setVisibility(getView().VISIBLE);
+            btnFinishRun.setText("Finish");
+        } else {
+            btnToggleRide.setText("Stop");
+            btnFinishRun.setVisibility(getView().GONE);
+        }
+    }
+
+    private void moveCameraToUser() {
+        if (!pathPoints.isEmpty() && !pathPoints.get(pathPoints.size() - 1).isEmpty()) {
+            if (map != null) {
+                ArrayList<LatLng> polyline = pathPoints.get(pathPoints.size() - 1);
+                CameraUpdateFactory.newLatLngZoom(
+                        polyline.get(polyline.size() - 1),
+                        MAP_ZOOM
+                );
+            }
+        }
+    }
+
+    private void addAllPolylines() {
+        for (ArrayList polyline : pathPoints) {
+            PolylineOptions polylineOptions = new PolylineOptions()
+                    .color(POLYLINE_COLOR)
+                    .width(POLYLINE_WIDTH)
+                    .addAll(polyline);
+            if (map != null) {
+                map.addPolyline(polylineOptions);
+            }
+        }
+    }
+    private void addLatestPolyline() {
+        if (!pathPoints.isEmpty()) {
+            // ArrayList<ArrayList<LatLng>>
+            ArrayList<LatLng> polyline = pathPoints.get(pathPoints.size() - 1);
+            // ArrayList<LatLng>
+            if (polyline.size() > 1) {
+                LatLng preLastLng = polyline.get(polyline.size() - 2);
+                LatLng lastLng = polyline.get(polyline.size() - 1);
+                PolylineOptions polylineOptions = new PolylineOptions()
+                        .color(POLYLINE_COLOR)
+                        .width(POLYLINE_WIDTH)
+                        .add(preLastLng)
+                        .add(lastLng);
+                if (map != null) {
+                    map.addPolyline(polylineOptions);
+                }
+            }
+        }
     }
 
     private void sendCommandToService(String action) {
