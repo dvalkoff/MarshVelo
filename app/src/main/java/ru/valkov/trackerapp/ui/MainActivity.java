@@ -39,12 +39,18 @@ public class MainActivity extends AppCompatActivity {
         navigateToTrackingFragmentIfNeed(getIntent());
 
         ft = getSupportFragmentManager().beginTransaction();
-        currentFragment = new TrackingFragment();
+        currentFragment = TrackingFragment.getInstance();
         ft.replace(R.id.flFragment, currentFragment);
         ft.commit();
 
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.bottomNavigationView);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
 
     }
 
@@ -56,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void navigateToTrackingFragmentIfNeed(Intent intent) {
         if (intent.getAction() == ACTION_SHOW_TRACKING_FRAGMENT) {
-            currentFragment = new TrackingFragment();
+            currentFragment = TrackingFragment.getInstance();
             getSupportFragmentManager().beginTransaction().replace(R.id.flFragment, currentFragment).commit();
         }
     }
