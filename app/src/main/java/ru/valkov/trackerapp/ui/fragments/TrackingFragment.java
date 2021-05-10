@@ -6,6 +6,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -32,6 +33,7 @@ import ru.valkov.trackerapp.other.TrackingUtility;
 import ru.valkov.trackerapp.services.TrackingService;
 import ru.valkov.trackerapp.ui.MainActivity;
 import ru.valkov.trackerapp.ui.viewmodels.MainViewModel;
+import timber.log.Timber;
 
 import static ru.valkov.trackerapp.other.Constants.ACTION_PAUSE_SERVICE;
 import static ru.valkov.trackerapp.other.Constants.ACTION_START_OR_RESUME_SERVICE;
@@ -50,11 +52,13 @@ public class TrackingFragment extends Fragment implements  EasyPermissions.Permi
     private MapView mapView;
     private Button btnToggleRide;
     private Button btnFinishRun;
+    private TextView tvTimer;
+
+    private long currentTimeInMillis = 0;
 
     private static boolean isTracking = false;
     private static ArrayList<ArrayList<LatLng>> pathPoints = new ArrayList<>();
 
-    // TODO: Singleton doesn't help :(
     public static TrackingFragment getInstance() {
         if (trackingFragment == null) {
             trackingFragment = new TrackingFragment();
@@ -75,6 +79,7 @@ public class TrackingFragment extends Fragment implements  EasyPermissions.Permi
 
         btnToggleRide = getView().findViewById(R.id.btnToggleRun);
         btnFinishRun = getView().findViewById(R.id.btnFinishRun);
+        tvTimer = getView().findViewById(R.id.tvTimer);
 
         // Request permissions from user
         requestPermission();
@@ -96,6 +101,7 @@ public class TrackingFragment extends Fragment implements  EasyPermissions.Permi
         TrackingService.isTracking.observe(getViewLifecycleOwner(), new Observer<Boolean>() {
             @Override
             public void onChanged(Boolean aBoolean) {
+                Timber.e("TRACKING FRAGMENT: isTracking has changed");
                 updateTracking(aBoolean);
             }
         });
@@ -105,6 +111,15 @@ public class TrackingFragment extends Fragment implements  EasyPermissions.Permi
                 pathPoints = arrayLists;
                 addLatestPolyline();
                 moveCameraToUser();
+            }
+        });
+
+        TrackingService.timeRideInMillis.observe(getViewLifecycleOwner(), new Observer<Long>() {
+            @Override
+            public void onChanged(Long aLong) {
+                currentTimeInMillis = aLong;
+                String formattedTime = TrackingUtility.getFormattedStopWath(currentTimeInMillis, true);
+                tvTimer.setText(formattedTime);
             }
         });
     }
@@ -164,9 +179,14 @@ public class TrackingFragment extends Fragment implements  EasyPermissions.Permi
                         .add(preLastLng)
                         .add(lastLng);
                 if (map != null) {
+                    Timber.e("TRACKING_FRAGMENT: add latest polyline: " + preLastLng.longitude + " " + preLastLng.latitude + " -!-" + lastLng.longitude + " " + lastLng.latitude);
                     map.addPolyline(polylineOptions);
+                } else {
+                    Timber.e("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA  PIZDEC");
                 }
             }
+        } else {
+            Timber.e("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA  PIZDEC PATH POINTS");
         }
     }
 
@@ -187,18 +207,21 @@ public class TrackingFragment extends Fragment implements  EasyPermissions.Permi
     public void onStart() {
         super.onStart();
         mapView.onResume();
+        addAllPolylines();
     }
 
     @Override
     public void onStop() {
         super.onStop();
         mapView.onStop();
+        addAllPolylines();
     }
 
     @Override
     public void onPause() {
         super.onPause();
         mapView.onPause();
+        addAllPolylines();
     }
 
     @Override
@@ -211,6 +234,7 @@ public class TrackingFragment extends Fragment implements  EasyPermissions.Permi
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         mapView.onSaveInstanceState(outState);
+        addAllPolylines();
     }
 
     @Override
