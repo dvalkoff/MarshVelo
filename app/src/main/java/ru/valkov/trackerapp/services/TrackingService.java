@@ -25,9 +25,6 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.maps.model.LatLng;
 
-import kotlin.collections.CollectionsKt;
-import kotlinx.coroutines.CoroutineScope;
-import kotlinx.coroutines.DispatchedKt;
 import ru.valkov.trackerapp.R;
 import ru.valkov.trackerapp.other.TrackingUtility;
 import ru.valkov.trackerapp.ui.MainActivity;
@@ -59,13 +56,14 @@ public class TrackingService extends LifecycleService {
     public static MutableLiveData<ArrayList<ArrayList<LatLng>>> pathPoints = new MutableLiveData<>();
     private FusedLocationProviderClient fusedLocationProviderClient;
 
-
     private void postInitialValues() {
         Timber.d("TRACKING_SERVICE: Tracking LiveData initialized");
         isTracking.postValue(false);
         pathPoints.setValue(new ArrayList<>());
         pathPoints.postValue(pathPoints.getValue());
     }
+
+
 
     @Override
     public void onCreate() {
@@ -199,17 +197,16 @@ public class TrackingService extends LifecycleService {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             createNotificationChannel(notificationManager);
         }
+
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
                 .setAutoCancel(false) // Notification always active
                 .setOngoing(true) // Notification can't be swiped away
                 .setSmallIcon(R.drawable.bike)
-                .setContentTitle("Running App")
-                .setContentText("00:00:00")
+                .setContentTitle("MarshVelo")
+                .setContentText("You are riding now!")
                 .setContentIntent(getMainActivityPendingIntent());
         startForeground(NOTIFICATION_ID, notificationBuilder.build());
     }
-
-    // Notification functions
 
     private PendingIntent getMainActivityPendingIntent() {
         Intent intent  = new Intent(this, MainActivity.class);
