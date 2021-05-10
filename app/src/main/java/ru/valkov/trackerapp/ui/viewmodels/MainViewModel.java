@@ -6,6 +6,7 @@ import javax.inject.Inject;
 
 import dagger.hilt.android.lifecycle.HiltViewModel;
 import ru.valkov.trackerapp.repositories.MainRepository;
+import ru.valkov.trackerapp.ui.fragments.TrackingFragment;
 
 @HiltViewModel
 public class MainViewModel extends ViewModel {
