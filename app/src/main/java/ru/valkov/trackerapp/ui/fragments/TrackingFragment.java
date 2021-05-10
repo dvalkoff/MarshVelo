@@ -180,6 +180,7 @@ public class TrackingFragment extends Fragment implements  EasyPermissions.Permi
     public void onResume() {
         super.onResume();
         mapView.onResume();
+        addAllPolylines();
     }
 
     @Override

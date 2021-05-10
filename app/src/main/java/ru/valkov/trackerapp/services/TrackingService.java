@@ -26,11 +26,14 @@ import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.maps.model.LatLng;
 
 import kotlin.collections.CollectionsKt;
+import kotlinx.coroutines.CoroutineScope;
+import kotlinx.coroutines.DispatchedKt;
 import ru.valkov.trackerapp.R;
 import ru.valkov.trackerapp.other.TrackingUtility;
 import ru.valkov.trackerapp.ui.MainActivity;
 import timber.log.Timber;
 
+import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static ru.valkov.trackerapp.other.Constants.ACTION_PAUSE_SERVICE;
 import static ru.valkov.trackerapp.other.Constants.ACTION_SHOW_TRACKING_FRAGMENT;
 import static ru.valkov.trackerapp.other.Constants.ACTION_START_OR_RESUME_SERVICE;
@@ -49,9 +52,13 @@ public class TrackingService extends LifecycleService {
 
     private static boolean isFirstRun = true;
 
+    private static MutableLiveData<Long> timeRideInSeconds = new MutableLiveData<>();
+
+    public static MutableLiveData<Long> timeRideInMillis = new MutableLiveData<>();
     public static MutableLiveData<Boolean> isTracking = new MutableLiveData<>();
     public static MutableLiveData<ArrayList<ArrayList<LatLng>>> pathPoints = new MutableLiveData<>();
     private FusedLocationProviderClient fusedLocationProviderClient;
+
 
     private void postInitialValues() {
         Timber.d("TRACKING_SERVICE: Tracking LiveData initialized");
@@ -74,6 +81,18 @@ public class TrackingService extends LifecycleService {
         });
     }
 
+    private boolean isTimerEnabled = false;
+    private long lapTime = 0;
+    private long timeRide = 0;
+    private long timeStarted = 0;
+    private long lastSecondTimestamp = 0;
+
+    private void startTimer() {
+        isTracking.postValue(true);
+        timeStarted = System.currentTimeMillis();
+        isTimerEnabled = true;
+    }
+
     private void pauseService() {
         isTracking.postValue(false);
     }
@@ -83,6 +102,7 @@ public class TrackingService extends LifecycleService {
         switch (intent.getAction()) {
             case ACTION_START_OR_RESUME_SERVICE:
                 if (isFirstRun) {
+                    startTimer();
                     startForegroundService();
                     isFirstRun = false;
                     Timber.d("TRACKING_SERVICE: Start TrackingService");
@@ -108,7 +128,7 @@ public class TrackingService extends LifecycleService {
         if (polylines != null) {
             polylines.add(new ArrayList<>());
             pathPoints.postValue(polylines);
-            Timber.d("TRACKING_SERVICE: empty PolyLine added");
+            Timber.e("TRACKING_SERVICE: empty PolyLine added");
         }
     }
 
@@ -145,7 +165,6 @@ public class TrackingService extends LifecycleService {
             }
         } else  {
             fusedLocationProviderClient.removeLocationUpdates(locationCallback());
-
         }
     }
 
@@ -207,7 +226,7 @@ public class TrackingService extends LifecycleService {
         NotificationChannel channel = new NotificationChannel(
                 NOTIFICATION_CHANNEL_ID,
                 NOTIFICATION_CHANNEL_NAME,
-                NotificationManager.IMPORTANCE_LOW);
+                IMPORTANCE_LOW);
         notificationManager.createNotificationChannel(channel);
     }
 }
