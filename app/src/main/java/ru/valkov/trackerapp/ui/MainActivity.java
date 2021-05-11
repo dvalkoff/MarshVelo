@@ -49,11 +49,10 @@ public class MainActivity extends AppCompatActivity {
         currentFragment = trackingFragment;
         ft.replace(R.id.flFragment, currentFragment);
         ft.commit();
-        /*
         try {
             getSupportActionBar().hide();
         } catch (NullPointerException e) { }
-         */
+
 
         navigateToTrackingFragmentIfNeed(getIntent());
 
@@ -82,11 +81,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public static void setCurrentFragment(Fragment currentFrag) {
-        currentFragment = currentFragment;
+        currentFragment = currentFrag;
     }
 
     public static void setTrackingFragment(Fragment trackingFrag) {
-        trackingFragment = trackingFragment;
+        trackingFragment = trackingFrag;
     }
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener = new BottomNavigationView.OnNavigationItemSelectedListener(){

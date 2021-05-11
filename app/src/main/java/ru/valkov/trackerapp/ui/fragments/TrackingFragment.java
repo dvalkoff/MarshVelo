@@ -6,15 +6,19 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.Editable;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -71,6 +75,9 @@ public class TrackingFragment extends Fragment implements  EasyPermissions.Permi
 
     // private Menu menu = null;
 
+    private String rideName = null;
+    private boolean rideNameIsEmpty = true;
+
     private long currentTimeInMillis= 0;
     private static boolean isTracking = false;
     private static ArrayList<ArrayList<LatLng>> pathPoints = new ArrayList<>();
@@ -121,22 +128,54 @@ public class TrackingFragment extends Fragment implements  EasyPermissions.Permi
         btnFinishRun.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                zoomToSeeWholeTrack();
-                endAndSaveToDatabase("name");
-                btnToggleRide.setText("Start");
-                // menu.getItem(0).setVisible(true);
-                btnFinishRun.setVisibility(getView().GONE);
-                FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
-                trackingFragment = new TrackingFragment();
-                MainActivity.setCurrentFragment(trackingFragment);
-                MainActivity.setTrackingFragment(trackingFragment);
-                ft.replace(R.id.flFragment, trackingFragment).addToBackStack(null).commit();
+                if (pathPoints == null || pathPoints.isEmpty()) {
+                    return;
+                } else if (pathPoints.get(pathPoints.size() - 1).isEmpty()){
+                    return;
+                }
+                setNameForRide();
+
             }
         });
-
-
         // setHasOptionsMenu(true);
+    }
 
+    private void saveRideAndCreateFragment() {
+        btnToggleRide.setText("Start");
+        // menu.getItem(0).setVisible(true);
+        btnFinishRun.setVisibility(getView().GONE);
+        FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
+        trackingFragment = new TrackingFragment();
+        MainActivity.setCurrentFragment(trackingFragment);
+        MainActivity.setTrackingFragment(trackingFragment);
+        ft.replace(R.id.flFragment, trackingFragment).addToBackStack(null).commit();
+    }
+
+    private void setNameForRide() {
+        AlertDialog.Builder alert = new AlertDialog.Builder(getContext());
+
+        alert.setTitle("Name your ride");
+
+        // Set an EditText view to get user input
+        EditText input = new EditText(getContext());
+        alert.setView(input);
+
+        alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                if (input.getText() != null && !input.getText().toString().isEmpty()) {
+                    zoomToSeeWholeTrack();
+                    endAndSaveToDatabase(input.getText().toString());
+                    saveRideAndCreateFragment();
+                    Timber.d("TRACKING_FRAGMENT: SAVING YOUR ROUTE # 1: " + input.getText().toString());
+                }
+            }
+        });
+        alert.setNegativeButton("No Option", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                dialog.cancel();
+            }
+        });
+        alert.show();
     }
 
     /*
@@ -275,6 +314,7 @@ public class TrackingFragment extends Fragment implements  EasyPermissions.Permi
             }
             long dateTimeStamp = Calendar.getInstance().getTimeInMillis();
             Ride ride = new Ride(name, bmp, dateTimeStamp, distanceInMeters, currentTimeInMillis);
+            Timber.e("TRACKING_FRAGMENT: YOUR RIDE SUCCESSFULLY SAVED");
             viewModel.insertRide(ride);
             Snackbar.make(
                     requireActivity().findViewById(R.id.rootView),
