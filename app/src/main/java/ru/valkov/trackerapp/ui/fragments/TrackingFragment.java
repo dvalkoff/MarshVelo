@@ -91,9 +91,8 @@ public class TrackingFragment extends Fragment implements  EasyPermissions.Permi
             }
         });
         mapView.getMapAsync(this);
-        addAllPolylines();
-
         subscribeToObservers();
+        addAllPolylines();
     }
 
     private void subscribeToObservers() {
@@ -125,6 +124,7 @@ public class TrackingFragment extends Fragment implements  EasyPermissions.Permi
             sendCommandToService(ACTION_PAUSE_SERVICE);
         } else {
             sendCommandToService(ACTION_START_OR_RESUME_SERVICE);
+            getActivity().findViewById(R.id.bottomNavigationView).setVisibility(View.GONE);
         }
     }
 
