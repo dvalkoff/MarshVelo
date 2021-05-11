@@ -48,11 +48,11 @@ import java.util.List;
 
 public class TrackingService extends LifecycleService {
 
-    private static boolean isFirstRun = true;
-    private boolean serviceKilled = false;
+    private static boolean isFirstRide = true;
 
     private static MutableLiveData<Long> timeRideInSeconds = new MutableLiveData<>();
 
+    public static MutableLiveData<Boolean> serviceKilled = new MutableLiveData<>();
     public static MutableLiveData<Long> timeRideInMillis = new MutableLiveData<>();
     public static MutableLiveData<Boolean> isTracking = new MutableLiveData<>();
     public static MutableLiveData<ArrayList<ArrayList<LatLng>>> pathPoints = new MutableLiveData<>();
@@ -60,6 +60,7 @@ public class TrackingService extends LifecycleService {
 
     private void postInitialValues() {
         Timber.d("TRACKING_SERVICE: Tracking LiveData initialized");
+        serviceKilled.postValue(true);
         timeRideInMillis.postValue(0L);
         isTracking.postValue(false);
         pathPoints.setValue(new ArrayList<>());
@@ -75,13 +76,13 @@ public class TrackingService extends LifecycleService {
         isTracking.observe(this, new Observer<Boolean>() {
             @Override
             public void onChanged(Boolean aBoolean) {
+                serviceKilled.postValue(false);
                 Timber.d("TRACKING_SERVICE: Tracking observed");
                 updateLocationTracking(isTracking.getValue());
             }
         });
     }
 
-    private boolean isTimerEnabled = false;
     private long pauseStartTimeInMillis = 0;
     private long pauseStopTimeInMillis = 0;
     private long timePauseInMillis = 0;
@@ -108,7 +109,6 @@ public class TrackingService extends LifecycleService {
             timeStarted = System.currentTimeMillis();
         }
         timerHandler.postDelayed(timerRunnable, 0);
-        isTimerEnabled = true;
     }
 
     private void pauseService() {
@@ -118,8 +118,8 @@ public class TrackingService extends LifecycleService {
     }
 
     private void killService() {
-        serviceKilled = true;
-        isFirstRun = true;
+        serviceKilled.postValue(true);
+        isFirstRide = true;
         pauseService();
         postInitialValues();
         stopForeground(true);
@@ -130,9 +130,9 @@ public class TrackingService extends LifecycleService {
     public int onStartCommand(@Nullable Intent intent, int flags, int startId) {
         switch (intent.getAction()) {
             case ACTION_START_OR_RESUME_SERVICE:
-                if (isFirstRun) {
+                if (isFirstRide) {
                     startForegroundService();
-                    isFirstRun = false;
+                    isFirstRide = false;
                     Timber.d("TRACKING_SERVICE: Start TrackingService");
                 } else {
                     startForegroundService();

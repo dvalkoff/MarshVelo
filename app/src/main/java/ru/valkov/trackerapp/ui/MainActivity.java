@@ -29,12 +29,12 @@ import static ru.valkov.trackerapp.other.Constants.ACTION_SHOW_TRACKING_FRAGMENT
 @AndroidEntryPoint
 public class MainActivity extends AppCompatActivity {
 
-    Fragment currentFragment = null;
-    FragmentTransaction ft;
+    private FragmentTransaction ft;
 
-    Fragment trackingFragment = null;
-    Fragment statisticsFragment = null;
-    Fragment bluetoothFragment = null;
+    private static Fragment currentFragment = null;
+    private static Fragment trackingFragment = null;
+    private static Fragment statisticsFragment = null;
+    private static Fragment bluetoothFragment = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +79,14 @@ public class MainActivity extends AppCompatActivity {
             currentFragment = trackingFragment;
             getSupportFragmentManager().beginTransaction().show(trackingFragment).commit();
         }
+    }
+
+    public static void setCurrentFragment(Fragment currentFrag) {
+        currentFragment = currentFragment;
+    }
+
+    public static void setTrackingFragment(Fragment trackingFrag) {
+        trackingFragment = trackingFragment;
     }
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener = new BottomNavigationView.OnNavigationItemSelectedListener(){

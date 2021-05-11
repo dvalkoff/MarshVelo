@@ -16,6 +16,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -59,6 +61,7 @@ public class TrackingFragment extends Fragment implements  EasyPermissions.Permi
 
     private static TrackingFragment trackingFragment = null;
 
+    private boolean serviceKilled = true;
     private MainViewModel viewModel;
     private GoogleMap map = null;
     private MapView mapView;
@@ -120,6 +123,14 @@ public class TrackingFragment extends Fragment implements  EasyPermissions.Permi
             public void onClick(View v) {
                 zoomToSeeWholeTrack();
                 endAndSaveToDatabase("name");
+                btnToggleRide.setText("Start");
+                // menu.getItem(0).setVisible(true);
+                btnFinishRun.setVisibility(getView().GONE);
+                FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
+                trackingFragment = new TrackingFragment();
+                MainActivity.setCurrentFragment(trackingFragment);
+                MainActivity.setTrackingFragment(trackingFragment);
+                ft.replace(R.id.flFragment, trackingFragment).addToBackStack(null).commit();
             }
         });
 
@@ -200,6 +211,13 @@ public class TrackingFragment extends Fragment implements  EasyPermissions.Permi
                 tvTimer.setText(TrackingUtility.getFormattedStopWath(aLong, true));
             }
         });
+
+        TrackingService.serviceKilled.observe(getViewLifecycleOwner(), new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean aBoolean) {
+                serviceKilled = aBoolean;
+            }
+        });
     }
 
     private void toggleRide() {
@@ -214,12 +232,17 @@ public class TrackingFragment extends Fragment implements  EasyPermissions.Permi
 
     private void updateTracking(boolean isTrack) {
         isTracking = isTrack;
-        if (!isTracking) {
+        if (!isTracking && !serviceKilled) {
+            Timber.e("Here is a problem");
             btnToggleRide.setText("Resume");
             btnFinishRun.setVisibility(getView().VISIBLE);
             btnFinishRun.setText("Finish");
-        } else {
+        } else if (!serviceKilled) {
             btnToggleRide.setText("Stop");
+            // menu.getItem(0).setVisible(true);
+            btnFinishRun.setVisibility(getView().GONE);
+        } else if (serviceKilled) {
+            btnToggleRide.setText("Start");
             // menu.getItem(0).setVisible(true);
             btnFinishRun.setVisibility(getView().GONE);
         }
