@@ -1,9 +1,14 @@
 package ru.valkov.trackerapp.ui.fragments;
 
 import android.Manifest;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -20,9 +25,13 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import dagger.hilt.android.AndroidEntryPoint;
@@ -30,6 +39,7 @@ import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.AppSettingsDialog;
 import pub.devrel.easypermissions.EasyPermissions;
 import ru.valkov.trackerapp.R;
+import ru.valkov.trackerapp.database.Ride;
 import ru.valkov.trackerapp.other.TrackingUtility;
 import ru.valkov.trackerapp.services.TrackingService;
 import ru.valkov.trackerapp.ui.MainActivity;
@@ -38,6 +48,7 @@ import timber.log.Timber;
 
 import static ru.valkov.trackerapp.other.Constants.ACTION_PAUSE_SERVICE;
 import static ru.valkov.trackerapp.other.Constants.ACTION_START_OR_RESUME_SERVICE;
+import static ru.valkov.trackerapp.other.Constants.ACTION_STOP_SERVICE;
 import static ru.valkov.trackerapp.other.Constants.MAP_ZOOM;
 import static ru.valkov.trackerapp.other.Constants.POLYLINE_COLOR;
 import static ru.valkov.trackerapp.other.Constants.POLYLINE_WIDTH;
@@ -54,6 +65,8 @@ public class TrackingFragment extends Fragment implements  EasyPermissions.Permi
     private Button btnToggleRide;
     private Button btnFinishRun;
     private TextView tvTimer;
+
+    // private Menu menu = null;
 
     private long currentTimeInMillis= 0;
     private static boolean isTracking = false;
@@ -88,6 +101,9 @@ public class TrackingFragment extends Fragment implements  EasyPermissions.Permi
         btnFinishRun = getView().findViewById(R.id.btnFinishRun);
         tvTimer = getView().findViewById(R.id.tvTimer);
 
+        mapView.getMapAsync(this);
+        subscribeToObservers();
+
         // Request permissions from user
         requestPermission();
         // Create an instance of ViewModel
@@ -98,9 +114,68 @@ public class TrackingFragment extends Fragment implements  EasyPermissions.Permi
                 toggleRide();
             }
         });
-        mapView.getMapAsync(this);
-        subscribeToObservers();
-        addAllPolylines();
+
+        btnFinishRun.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                zoomToSeeWholeTrack();
+                endAndSaveToDatabase("name");
+            }
+        });
+
+
+        // setHasOptionsMenu(true);
+
+    }
+
+    /*
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.toolbar_tracking_menu, menu);
+        this.menu = menu;
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(@NonNull Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        if (currentTimeInMillis > 0) {
+            this.menu.getItem(0).setVisible(true);
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        showCancelTrackingDialog();
+        return super.onOptionsItemSelected(item);
+    }
+
+     */
+
+    /*
+    private void showCancelTrackingDialog() {
+        MaterialAlertDialogBuilder dialog = new MaterialAlertDialogBuilder(requireContext(), R.style.Theme_AppCompat_Light_Dialog)
+                .setTitle("Cancel the ride?")
+                .setIcon(R.drawable.bike);
+        dialog.setPositiveButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                stopRide();
+            }
+        });
+        dialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+        dialog.show();
+    }
+
+     */
+
+    private void stopRide() {
+        sendCommandToService(ACTION_STOP_SERVICE);
     }
 
     private void subscribeToObservers() {
@@ -129,6 +204,7 @@ public class TrackingFragment extends Fragment implements  EasyPermissions.Permi
 
     private void toggleRide() {
         if (isTracking) {
+            // menu.getItem(0).setVisible(true);
             sendCommandToService(ACTION_PAUSE_SERVICE);
         } else {
             sendCommandToService(ACTION_START_OR_RESUME_SERVICE);
@@ -144,8 +220,46 @@ public class TrackingFragment extends Fragment implements  EasyPermissions.Permi
             btnFinishRun.setText("Finish");
         } else {
             btnToggleRide.setText("Stop");
+            // menu.getItem(0).setVisible(true);
             btnFinishRun.setVisibility(getView().GONE);
         }
+    }
+
+    private void zoomToSeeWholeTrack() {
+        LatLngBounds.Builder bounds = LatLngBounds.builder();
+        for (ArrayList<LatLng> polyline: pathPoints) {
+            for (LatLng pos: polyline) {
+                bounds.include(pos);
+            }
+        }
+
+        if (map != null) {
+            map.moveCamera(
+                    CameraUpdateFactory.newLatLngBounds(
+                            bounds.build(),
+                            mapView.getWidth(),
+                            mapView.getHeight(),
+                            (int) (mapView.getHeight() * 0.05f)
+                    )
+            );
+        }
+    }
+
+    private void endAndSaveToDatabase(String name) {
+        map.snapshot(bmp -> {
+            int distanceInMeters = 0;
+            for (ArrayList<LatLng> polyline: pathPoints) {
+                distanceInMeters += (int) TrackingUtility.calculatePolylineLength(polyline);
+            }
+            long dateTimeStamp = Calendar.getInstance().getTimeInMillis();
+            Ride ride = new Ride(name, bmp, dateTimeStamp, distanceInMeters, currentTimeInMillis);
+            viewModel.insertRide(ride);
+            Snackbar.make(
+                    requireActivity().findViewById(R.id.rootView),
+                    "Ride saved successfully",
+                    Snackbar.LENGTH_SHORT).show();
+        });
+        stopRide();
     }
 
     private void moveCameraToUser() {

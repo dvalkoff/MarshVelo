@@ -49,10 +49,11 @@ public class MainActivity extends AppCompatActivity {
         currentFragment = trackingFragment;
         ft.replace(R.id.flFragment, currentFragment);
         ft.commit();
-
+        /*
         try {
             getSupportActionBar().hide();
         } catch (NullPointerException e) { }
+         */
 
         navigateToTrackingFragmentIfNeed(getIntent());
 
@@ -74,7 +75,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void navigateToTrackingFragmentIfNeed(Intent intent) {
         if (intent.getAction() == ACTION_SHOW_TRACKING_FRAGMENT) {
-            // getSupportFragmentManager().beginTransaction().replace(R.id.flFragment, currentFragment).commit();
             getSupportFragmentManager().beginTransaction().hide(currentFragment);
             currentFragment = trackingFragment;
             getSupportFragmentManager().beginTransaction().show(trackingFragment).commit();

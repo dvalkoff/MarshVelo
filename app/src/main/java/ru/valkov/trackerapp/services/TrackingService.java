@@ -49,6 +49,7 @@ import java.util.List;
 public class TrackingService extends LifecycleService {
 
     private static boolean isFirstRun = true;
+    private boolean serviceKilled = false;
 
     private static MutableLiveData<Long> timeRideInSeconds = new MutableLiveData<>();
 
@@ -116,6 +117,15 @@ public class TrackingService extends LifecycleService {
         isTracking.postValue(false);
     }
 
+    private void killService() {
+        serviceKilled = true;
+        isFirstRun = true;
+        pauseService();
+        postInitialValues();
+        stopForeground(true);
+        stopSelf();
+    }
+
     @Override
     public int onStartCommand(@Nullable Intent intent, int flags, int startId) {
         switch (intent.getAction()) {
@@ -134,6 +144,7 @@ public class TrackingService extends LifecycleService {
                 Timber.d("TRACKING_SERVICE: ACTION_PAUSE_SERVICE");
                 break;
             case ACTION_STOP_SERVICE:
+                killService();
                 Timber.d("TRACKING_SERVICE: ACTION_STOP_SERVICE");
                 break;
         }
