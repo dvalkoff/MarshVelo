@@ -17,6 +17,7 @@ import ru.valkov.trackerapp.ui.fragments.TrackingFragment;
 import timber.log.Timber;
 
 
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -29,34 +30,34 @@ import static ru.valkov.trackerapp.other.Constants.ACTION_SHOW_TRACKING_FRAGMENT
 public class MainActivity extends AppCompatActivity {
 
     Fragment currentFragment = null;
+    FragmentTransaction ft;
+
     Fragment trackingFragment = null;
     Fragment statisticsFragment = null;
     Fragment bluetoothFragment = null;
-    FragmentTransaction ft;
-    boolean[] alreadyCreated = {true, false, false};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        ft = getSupportFragmentManager().beginTransaction();
-        trackingFragment = new TrackingFragment();
-        currentFragment = trackingFragment;
-        ft.add(R.id.flFragment, currentFragment);
+        Timber.e("Main Activity created");
 
         setContentView(R.layout.activity_main);
+
+        ft = getSupportFragmentManager().beginTransaction();
+        trackingFragment = TrackingFragment.getInstance();
+        currentFragment = trackingFragment;
+        ft.replace(R.id.flFragment, currentFragment);
+        ft.commit();
 
         try {
             getSupportActionBar().hide();
         } catch (NullPointerException e) { }
-        // navigateToTrackingFragmentIfNeed(getIntent());
 
-
-        // ft.replace(R.id.flFragment, currentFragment);
-        ft.commit();
+        navigateToTrackingFragmentIfNeed(getIntent());
 
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.bottomNavigationView);
-        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+        navigation.setOnNavigationItemSelectedListener(OnNavigationItemSelectedListener);
 
     }
 
@@ -73,8 +74,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void navigateToTrackingFragmentIfNeed(Intent intent) {
         if (intent.getAction() == ACTION_SHOW_TRACKING_FRAGMENT) {
-            currentFragment = TrackingFragment.getInstance();
-            getSupportFragmentManager().beginTransaction().replace(R.id.flFragment, currentFragment).commit();
+            // getSupportFragmentManager().beginTransaction().replace(R.id.flFragment, currentFragment).commit();
+            getSupportFragmentManager().beginTransaction().hide(currentFragment);
+            currentFragment = trackingFragment;
+            getSupportFragmentManager().beginTransaction().show(trackingFragment).commit();
         }
     }
 
@@ -95,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
                     break;
             }
             if (currentFragment != null) {
-                getSupportFragmentManager().beginTransaction().replace(R.id.flFragment, currentFragment).commit();
+                fragmentManager.beginTransaction().replace(R.id.flFragment, currentFragment).commit();
                 return true;
             }
             return false;
@@ -105,87 +108,41 @@ public class MainActivity extends AppCompatActivity {
     private BottomNavigationView.OnNavigationItemSelectedListener OnNavigationItemSelectedListener = new BottomNavigationView.OnNavigationItemSelectedListener(){
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-            FragmentManager fm = getSupportFragmentManager();
-            currentFragment = null;
+            FragmentManager fragmentManager = getSupportFragmentManager();
             switch (item.getItemId()) {
                 case R.id.fragment_tracking:
-                    if (trackingFragment != null){
-                        trackingFragment.getView().setVisibility(View.VISIBLE);
-                        /*
-
-                        Timber.e("MAIN ACTIVITY: TrackingFragment already exists, show that");
-                        fm
-                                .beginTransaction()
-                                .show(trackingFragment)
-                                .commit();
-
-                         */
+                    fragmentManager.beginTransaction().hide(currentFragment).commit();
+                    if (trackingFragment != null) {
+                        Timber.e("MAIN ACTIVITY: open Tracking fragment");
+                        fragmentManager.beginTransaction().show(trackingFragment).commit();
                     } else {
-                        Timber.e("MAIN ACTIVITY: create new TrackingFragment");
-                        trackingFragment = new TrackingFragment();
-                        currentFragment = trackingFragment;
-                        fm
-                                .beginTransaction()
-                                .add(R.id.flFragment, currentFragment)
-                                .commit();
-                        alreadyCreated[0] = true;
+                        Timber.e("MAIN ACTIVITY: add new Tracking fragment");
+                        trackingFragment = TrackingFragment.getInstance();
+                        fragmentManager.beginTransaction().add(R.id.flFragment, trackingFragment).commit();
                     }
-                    if (statisticsFragment != null){
-
-                        Timber.e("MAIN ACTIVITY: hide statisticsFragment");
-                        statisticsFragment.getView().setVisibility(View.GONE);
-                        // fm.beginTransaction().hide(statisticsFragment).commit();
-                    }
-                    if (bluetoothFragment != null){
-                        Timber.e("MAIN ACTIVITY: hide bluetoothFragment");
-                        bluetoothFragment.getView().setVisibility(View.GONE);
-                        // fm.beginTransaction().hide(bluetoothFragment).commit();
-                    }
+                    currentFragment = trackingFragment;
                     return true;
                 case R.id.fragment_statistics:
+                    fragmentManager.beginTransaction().hide(currentFragment).commit();
                     if (statisticsFragment != null) {
-                        statisticsFragment.getView().setVisibility(View.VISIBLE);
-                        /*
-                        Timber.e("MAIN ACTIVITY: statisticsFragment already exists, show that");
-                        fm
-                                .beginTransaction()
-                                .show(statisticsFragment)
-                                .commit();
-                         */
+                        Timber.e("MAIN ACTIVITY: open statistics fragment");
+                        fragmentManager.beginTransaction().show(statisticsFragment).commit();
                     } else {
-                        Timber.e("MAIN ACTIVITY: create new StatisticsFragment");
+                        Timber.e("MAIN ACTIVITY: create new statistics fragment");
                         statisticsFragment = new StatisticsFragment();
-                        currentFragment = statisticsFragment;
-                        fm.beginTransaction().add(R.id.flFragment, currentFragment).commit();
+                        fragmentManager.beginTransaction().add(R.id.flFragment, statisticsFragment).commit();
                     }
-                    if (trackingFragment != null) {
-                        Timber.e("Hide tracking fragment");
-                        trackingFragment.getView().setVisibility(View.GONE);
-                        // fm.beginTransaction().hide((TrackingFragment) fm.findFragmentById(R.id.fragment_tracking)).commit();
-                    }
-                    if (bluetoothFragment != null){
-                        bluetoothFragment.getView().setVisibility(View.GONE);
-                        // fm.beginTransaction().hide(bluetoothFragment).commit();
-                    }
+                    currentFragment = statisticsFragment;
                     return true;
                 case R.id.fragment_bluetooth:
+                    fragmentManager.beginTransaction().hide(currentFragment).commit();
                     if (bluetoothFragment != null) {
-                        Timber.e("MAIN ACTIVITY: bluetoothFragment already exists, show that");
-                        bluetoothFragment.getView().setVisibility(View.VISIBLE);
-                        // fm.beginTransaction().show(bluetoothFragment).commit();
+                        fragmentManager.beginTransaction().show(bluetoothFragment).commit();
                     } else {
                         bluetoothFragment = new BluetoothFragment();
-                        currentFragment = bluetoothFragment;
-                        fm.beginTransaction().add(R.id.flFragment, currentFragment).commit();
+                        fragmentManager.beginTransaction().add(R.id.flFragment, bluetoothFragment).commit();
                     }
-                    if (trackingFragment != null){
-                        trackingFragment.getView().setVisibility(View.GONE);
-                        // fm.beginTransaction().hide(trackingFragment).commit();
-                    }
-                    if (statisticsFragment != null){
-                        statisticsFragment.getView().setVisibility(View.GONE);
-                        // fm.beginTransaction().hide(statisticsFragment).commit();
-                    }
+                    currentFragment = bluetoothFragment;
                     return true;
             }
             return false;
