@@ -190,6 +190,12 @@ public class TrackingFragment extends Fragment implements  EasyPermissions.Permi
     }
 
     private void subscribeToObservers() {
+        TrackingService.serviceKilled.observe(getViewLifecycleOwner(), new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean aBoolean) {
+                serviceKilled = aBoolean;
+            }
+        });
         TrackingService.isTracking.observe(getViewLifecycleOwner(), new Observer<Boolean>() {
             @Override
             public void onChanged(Boolean aBoolean) {
@@ -209,13 +215,6 @@ public class TrackingFragment extends Fragment implements  EasyPermissions.Permi
             public void onChanged(Long aLong) {
                 currentTimeInMillis = aLong;
                 tvTimer.setText(TrackingUtility.getFormattedStopWath(aLong, true));
-            }
-        });
-
-        TrackingService.serviceKilled.observe(getViewLifecycleOwner(), new Observer<Boolean>() {
-            @Override
-            public void onChanged(Boolean aBoolean) {
-                serviceKilled = aBoolean;
             }
         });
     }

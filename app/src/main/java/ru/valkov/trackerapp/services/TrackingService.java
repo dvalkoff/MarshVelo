@@ -76,7 +76,6 @@ public class TrackingService extends LifecycleService {
         isTracking.observe(this, new Observer<Boolean>() {
             @Override
             public void onChanged(Boolean aBoolean) {
-                serviceKilled.postValue(false);
                 Timber.d("TRACKING_SERVICE: Tracking observed");
                 updateLocationTracking(isTracking.getValue());
             }
@@ -131,6 +130,7 @@ public class TrackingService extends LifecycleService {
         switch (intent.getAction()) {
             case ACTION_START_OR_RESUME_SERVICE:
                 if (isFirstRide) {
+                    serviceKilled.postValue(false);
                     startForegroundService();
                     isFirstRide = false;
                     Timber.d("TRACKING_SERVICE: Start TrackingService");
