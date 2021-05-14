@@ -146,8 +146,8 @@ public class TrackingFragment extends Fragment implements  EasyPermissions.Permi
         btnFinishRun.setVisibility(getView().GONE);
         FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
         trackingFragment = new TrackingFragment();
-        MainActivity.setCurrentFragment(trackingFragment);
         MainActivity.setTrackingFragment(trackingFragment);
+        MainActivity.setCurrentFragment(trackingFragment);
         ft.replace(R.id.flFragment, trackingFragment).addToBackStack(null).commit();
     }
 
@@ -167,12 +167,12 @@ public class TrackingFragment extends Fragment implements  EasyPermissions.Permi
                     endAndSaveToDatabase(input.getText().toString());
                     saveRideAndCreateFragment();
                     Timber.d("TRACKING_FRAGMENT: SAVING YOUR ROUTE # 1: " + input.getText().toString());
+                } else {
+                    Snackbar.make(
+                            requireActivity().findViewById(R.id.rootView),
+                            "Enter correct name",
+                            Snackbar.LENGTH_SHORT).show();
                 }
-            }
-        });
-        alert.setNegativeButton("No Option", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-                dialog.cancel();
             }
         });
         alert.show();
@@ -323,6 +323,8 @@ public class TrackingFragment extends Fragment implements  EasyPermissions.Permi
         });
         stopRide();
     }
+
+
 
     private void moveCameraToUser() {
         if (!pathPoints.isEmpty() && !pathPoints.get(pathPoints.size() - 1).isEmpty()) {
