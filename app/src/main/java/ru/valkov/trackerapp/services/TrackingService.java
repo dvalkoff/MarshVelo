@@ -91,7 +91,6 @@ public class TrackingService extends LifecycleService {
         @Override
         public void run() {
             timeRideInMillis.postValue(System.currentTimeMillis() - timeStarted - timePauseInMillis);
-            // timeRideInSeconds.postValue(TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - timeStarted));
             timerHandler.postDelayed(this, 10);
         }
     };
@@ -179,19 +178,17 @@ public class TrackingService extends LifecycleService {
     private void updateLocationTracking(boolean isTracking) {
         Timber.d("TRACKING_SERVICE: trying to update Location Tracking");
         if (isTracking) {
-            if (TrackingUtility.hasLocationPermissions(this)) {
-                LocationRequest request = new LocationRequest();
-                request.setInterval(LOCATION_UPDATE_INTERVAL);
-                request.setFastestInterval(FASTEST_LOCATION_INTERVAL);
-                request.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+            LocationRequest request = new LocationRequest();
+            request.setInterval(LOCATION_UPDATE_INTERVAL);
+            request.setFastestInterval(FASTEST_LOCATION_INTERVAL);
+            request.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
-                fusedLocationProviderClient.requestLocationUpdates(
-                        request,
-                        locationCallback(),
-                        Looper.getMainLooper()
-                );
+            fusedLocationProviderClient.requestLocationUpdates(
+                    request,
+                    locationCallback(),
+                    Looper.getMainLooper()
+            );
                 Timber.d("TRACKING_SERVICE: Location Tracking is updated");
-            }
         } else  {
             Timber.d("TRACKING_SERVICE: Location Tracking remote");
             fusedLocationProviderClient.removeLocationUpdates(locationCallback());

@@ -13,23 +13,6 @@ import java.util.concurrent.TimeUnit;
 import pub.devrel.easypermissions.EasyPermissions;
 
 public class TrackingUtility {
-    public static boolean hasLocationPermissions(Context context) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-            return EasyPermissions.hasPermissions(
-                    context,
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-            );
-        } else {
-            return EasyPermissions.hasPermissions(
-                    context,
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION,
-                    Manifest.permission.ACCESS_BACKGROUND_LOCATION
-            );
-        }
-    }
-
     public static float calculatePolylineLength(ArrayList<LatLng> polyline) {
         float distance = 0;
         float[] result = new float[1];

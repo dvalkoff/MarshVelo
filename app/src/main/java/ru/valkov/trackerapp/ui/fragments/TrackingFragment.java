@@ -61,7 +61,7 @@ import static ru.valkov.trackerapp.other.Constants.POLYLINE_WIDTH;
 import static ru.valkov.trackerapp.other.Constants.REQUEST_CODE_LOCATION_PERMISSION;
 
 @AndroidEntryPoint
-public class TrackingFragment extends Fragment implements  EasyPermissions.PermissionCallbacks, OnMapReadyCallback {
+public class TrackingFragment extends Fragment implements OnMapReadyCallback {
 
     private static TrackingFragment trackingFragment = null;
 
@@ -72,8 +72,6 @@ public class TrackingFragment extends Fragment implements  EasyPermissions.Permi
     private Button btnToggleRide;
     private Button btnFinishRun;
     private TextView tvTimer;
-
-    // private Menu menu = null;
 
     private String rideName = null;
     private boolean rideNameIsEmpty = true;
@@ -114,8 +112,6 @@ public class TrackingFragment extends Fragment implements  EasyPermissions.Permi
         mapView.getMapAsync(this);
         subscribeToObservers();
 
-        // Request permissions from user
-        requestPermission();
         // Create an instance of ViewModel
         viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
         btnToggleRide.setOnClickListener(new View.OnClickListener() {
@@ -137,7 +133,6 @@ public class TrackingFragment extends Fragment implements  EasyPermissions.Permi
 
             }
         });
-        // setHasOptionsMenu(true);
     }
 
     private void saveRideAndCreateFragment() {
@@ -178,52 +173,6 @@ public class TrackingFragment extends Fragment implements  EasyPermissions.Permi
         alert.show();
     }
 
-    /*
-    @Override
-    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.toolbar_tracking_menu, menu);
-        this.menu = menu;
-    }
-
-    @Override
-    public void onPrepareOptionsMenu(@NonNull Menu menu) {
-        super.onPrepareOptionsMenu(menu);
-        if (currentTimeInMillis > 0) {
-            this.menu.getItem(0).setVisible(true);
-        }
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        showCancelTrackingDialog();
-        return super.onOptionsItemSelected(item);
-    }
-
-     */
-
-    /*
-    private void showCancelTrackingDialog() {
-        MaterialAlertDialogBuilder dialog = new MaterialAlertDialogBuilder(requireContext(), R.style.Theme_AppCompat_Light_Dialog)
-                .setTitle("Cancel the ride?")
-                .setIcon(R.drawable.bike);
-        dialog.setPositiveButton("No", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                stopRide();
-            }
-        });
-        dialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
-        dialog.show();
-    }
-
-     */
-
     private void stopRide() {
         sendCommandToService(ACTION_STOP_SERVICE);
     }
@@ -260,11 +209,9 @@ public class TrackingFragment extends Fragment implements  EasyPermissions.Permi
 
     private void toggleRide() {
         if (isTracking) {
-            // menu.getItem(0).setVisible(true);
             sendCommandToService(ACTION_PAUSE_SERVICE);
         } else {
             sendCommandToService(ACTION_START_OR_RESUME_SERVICE);
-            // getActivity().findViewById(R.id.bottomNavigationView).setVisibility(View.GONE);
         }
     }
 
@@ -413,51 +360,5 @@ public class TrackingFragment extends Fragment implements  EasyPermissions.Permi
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
         map = googleMap;
-    }
-
-
-    @AfterPermissionGranted(REQUEST_CODE_LOCATION_PERMISSION)
-    private void requestPermission() {
-        if (TrackingUtility.hasLocationPermissions(requireContext())) {
-            return;
-        }
-
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-            EasyPermissions.requestPermissions(
-                    this,
-                    "You need to accept location permissions to use MarshVelo",
-                    REQUEST_CODE_LOCATION_PERMISSION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-            );
-        } else {
-            EasyPermissions.requestPermissions(
-                    this,
-                    "You need to accept location permissions to use MarshVelo",
-                    REQUEST_CODE_LOCATION_PERMISSION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION,
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_BACKGROUND_LOCATION
-            );
-        }
-    }
-
-    @Override
-    public void onPermissionsGranted(int requestCode, @NonNull List<String> perms) {
-
-    }
-    @Override
-    public void onPermissionsDenied(int requestCode, @NonNull List<String> perms) {
-        if (EasyPermissions.somePermissionPermanentlyDenied(this, perms)) {
-            new AppSettingsDialog.Builder(this).build().show();
-        } else {
-            requestPermission();
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        EasyPermissions.onRequestPermissionsResult(requestCode,permissions, grantResults, MainActivity.class);
     }
 }

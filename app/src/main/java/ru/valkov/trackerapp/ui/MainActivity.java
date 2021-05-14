@@ -49,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
         currentFragment = trackingFragment;
         ft.replace(R.id.flFragment, currentFragment);
         ft.commit();
+
         try {
             getSupportActionBar().hide();
         } catch (NullPointerException e) { }
@@ -119,30 +120,6 @@ public class MainActivity extends AppCompatActivity {
                     fragmentManager.beginTransaction().add(R.id.flFragment, bluetoothFragment).commit();
                     currentFragment = bluetoothFragment;
                     return true;
-            }
-            return false;
-        }
-    };
-
-    private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener = new BottomNavigationView.OnNavigationItemSelectedListener(){
-        @Override
-        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            currentFragment = null;
-            switch (item.getItemId()) {
-                case R.id.fragment_tracking:
-                    currentFragment = TrackingFragment.getInstance();
-                    break;
-                case R.id.fragment_statistics:
-                    currentFragment = new StatisticsFragment();
-                    break;
-                case R.id.fragment_bluetooth:
-                    currentFragment = new BluetoothFragment();
-                    break;
-            }
-            if (currentFragment != null) {
-                fragmentManager.beginTransaction().replace(R.id.flFragment, currentFragment).commit();
-                return true;
             }
             return false;
         }
