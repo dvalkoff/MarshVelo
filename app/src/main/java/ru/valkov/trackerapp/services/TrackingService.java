@@ -1,11 +1,13 @@
 package ru.valkov.trackerapp.services;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
 import android.os.Handler;
@@ -14,6 +16,7 @@ import android.os.Looper;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.lifecycle.LifecycleService;
 import androidx.lifecycle.MutableLiveData;
@@ -152,7 +155,7 @@ public class TrackingService extends LifecycleService {
     }
 
     private void addEmptyPolyline() {
-        ArrayList polylines =  pathPoints.getValue();
+        ArrayList polylines = pathPoints.getValue();
         if (polylines != null) {
             polylines.add(new ArrayList<>());
             pathPoints.postValue(polylines);
@@ -174,7 +177,7 @@ public class TrackingService extends LifecycleService {
         }
     }
 
-    @SuppressLint("MissingPermission")
+
     private void updateLocationTracking(boolean isTracking) {
         Timber.d("TRACKING_SERVICE: trying to update Location Tracking");
         if (isTracking) {
@@ -183,6 +186,16 @@ public class TrackingService extends LifecycleService {
             request.setFastestInterval(FASTEST_LOCATION_INTERVAL);
             request.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return;
+            }
             fusedLocationProviderClient.requestLocationUpdates(
                     request,
                     locationCallback(),
