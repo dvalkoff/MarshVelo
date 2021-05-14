@@ -48,10 +48,11 @@ import java.util.List;
 
 public class TrackingService extends LifecycleService {
 
-    private static boolean isFirstRun = true;
+    private static boolean isFirstRide = true;
 
     private static MutableLiveData<Long> timeRideInSeconds = new MutableLiveData<>();
 
+    public static MutableLiveData<Boolean> serviceKilled = new MutableLiveData<>();
     public static MutableLiveData<Long> timeRideInMillis = new MutableLiveData<>();
     public static MutableLiveData<Boolean> isTracking = new MutableLiveData<>();
     public static MutableLiveData<ArrayList<ArrayList<LatLng>>> pathPoints = new MutableLiveData<>();
@@ -59,6 +60,7 @@ public class TrackingService extends LifecycleService {
 
     private void postInitialValues() {
         Timber.d("TRACKING_SERVICE: Tracking LiveData initialized");
+        serviceKilled.postValue(true);
         timeRideInMillis.postValue(0L);
         isTracking.postValue(false);
         pathPoints.setValue(new ArrayList<>());
@@ -80,7 +82,6 @@ public class TrackingService extends LifecycleService {
         });
     }
 
-    private boolean isTimerEnabled = false;
     private long pauseStartTimeInMillis = 0;
     private long pauseStopTimeInMillis = 0;
     private long timePauseInMillis = 0;
@@ -90,7 +91,6 @@ public class TrackingService extends LifecycleService {
         @Override
         public void run() {
             timeRideInMillis.postValue(System.currentTimeMillis() - timeStarted - timePauseInMillis);
-            // timeRideInSeconds.postValue(TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - timeStarted));
             timerHandler.postDelayed(this, 10);
         }
     };
@@ -107,7 +107,6 @@ public class TrackingService extends LifecycleService {
             timeStarted = System.currentTimeMillis();
         }
         timerHandler.postDelayed(timerRunnable, 0);
-        isTimerEnabled = true;
     }
 
     private void pauseService() {
@@ -116,13 +115,23 @@ public class TrackingService extends LifecycleService {
         isTracking.postValue(false);
     }
 
+    private void killService() {
+        serviceKilled.postValue(true);
+        isFirstRide = true;
+        pauseService();
+        postInitialValues();
+        stopForeground(true);
+        stopSelf();
+    }
+
     @Override
     public int onStartCommand(@Nullable Intent intent, int flags, int startId) {
         switch (intent.getAction()) {
             case ACTION_START_OR_RESUME_SERVICE:
-                if (isFirstRun) {
+                if (isFirstRide) {
+                    serviceKilled.postValue(false);
                     startForegroundService();
-                    isFirstRun = false;
+                    isFirstRide = false;
                     Timber.d("TRACKING_SERVICE: Start TrackingService");
                 } else {
                     startForegroundService();
@@ -134,6 +143,7 @@ public class TrackingService extends LifecycleService {
                 Timber.d("TRACKING_SERVICE: ACTION_PAUSE_SERVICE");
                 break;
             case ACTION_STOP_SERVICE:
+                killService();
                 Timber.d("TRACKING_SERVICE: ACTION_STOP_SERVICE");
                 break;
         }
@@ -168,19 +178,17 @@ public class TrackingService extends LifecycleService {
     private void updateLocationTracking(boolean isTracking) {
         Timber.d("TRACKING_SERVICE: trying to update Location Tracking");
         if (isTracking) {
-            if (TrackingUtility.hasLocationPermissions(this)) {
-                LocationRequest request = new LocationRequest();
-                request.setInterval(LOCATION_UPDATE_INTERVAL);
-                request.setFastestInterval(FASTEST_LOCATION_INTERVAL);
-                request.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+            LocationRequest request = new LocationRequest();
+            request.setInterval(LOCATION_UPDATE_INTERVAL);
+            request.setFastestInterval(FASTEST_LOCATION_INTERVAL);
+            request.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
-                fusedLocationProviderClient.requestLocationUpdates(
-                        request,
-                        locationCallback(),
-                        Looper.getMainLooper()
-                );
+            fusedLocationProviderClient.requestLocationUpdates(
+                    request,
+                    locationCallback(),
+                    Looper.getMainLooper()
+            );
                 Timber.d("TRACKING_SERVICE: Location Tracking is updated");
-            }
         } else  {
             Timber.d("TRACKING_SERVICE: Location Tracking remote");
             fusedLocationProviderClient.removeLocationUpdates(locationCallback());

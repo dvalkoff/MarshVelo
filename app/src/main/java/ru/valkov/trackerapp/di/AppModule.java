@@ -28,7 +28,7 @@ public class AppModule {
                 app,
                 RidingDatabase.class,
                 Constants.RIDING_DATABASE_NAME
-        ).build();
+        ).allowMainThreadQueries().build();
     }
 
     @Singleton

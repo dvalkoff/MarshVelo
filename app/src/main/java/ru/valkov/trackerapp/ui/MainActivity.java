@@ -30,12 +30,12 @@ import static ru.valkov.trackerapp.other.Constants.ACTION_SHOW_TRACKING_FRAGMENT
 @AndroidEntryPoint
 public class MainActivity extends AppCompatActivity {
 
-    Fragment currentFragment = null;
-    FragmentTransaction ft;
+    private FragmentTransaction ft;
 
-    Fragment trackingFragment = null;
-    Fragment statisticsFragment = null;
-    Fragment bluetoothFragment = null;
+    private static Fragment currentFragment = null;
+    private static Fragment trackingFragment = null;
+    private static Fragment statisticsFragment = null;
+    private static Fragment bluetoothFragment = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             getSupportActionBar().hide();
         } catch (NullPointerException e) { }
+
 
         navigateToTrackingFragmentIfNeed(getIntent());
 
@@ -76,36 +77,19 @@ public class MainActivity extends AppCompatActivity {
 
     private void navigateToTrackingFragmentIfNeed(Intent intent) {
         if (intent.getAction() == ACTION_SHOW_TRACKING_FRAGMENT) {
-            // getSupportFragmentManager().beginTransaction().replace(R.id.flFragment, currentFragment).commit();
             getSupportFragmentManager().beginTransaction().hide(currentFragment);
             currentFragment = trackingFragment;
             getSupportFragmentManager().beginTransaction().show(trackingFragment).commit();
         }
     }
 
-    private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener = new BottomNavigationView.OnNavigationItemSelectedListener(){
-        @Override
-        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            currentFragment = null;
-            switch (item.getItemId()) {
-                case R.id.fragment_tracking:
-                    currentFragment = TrackingFragment.getInstance();
-                    break;
-                case R.id.fragment_statistics:
-                    currentFragment = new StatisticsFragment();
-                    break;
-                case R.id.fragment_bluetooth:
-                    currentFragment = new BluetoothFragment();
-                    break;
-            }
-            if (currentFragment != null) {
-                fragmentManager.beginTransaction().replace(R.id.flFragment, currentFragment).commit();
-                return true;
-            }
-            return false;
-        }
-    };
+    public static void setCurrentFragment(Fragment currentFrag) {
+        currentFragment = currentFrag;
+    }
+
+    public static void setTrackingFragment(Fragment trackingFrag) {
+        trackingFragment = trackingFrag;
+    }
 
     private BottomNavigationView.OnNavigationItemSelectedListener OnNavigationItemSelectedListener = new BottomNavigationView.OnNavigationItemSelectedListener(){
         @Override
@@ -126,24 +110,16 @@ public class MainActivity extends AppCompatActivity {
                     return true;
                 case R.id.fragment_statistics:
                     fragmentManager.beginTransaction().hide(currentFragment).commit();
-                    if (statisticsFragment != null) {
-                        Timber.e("MAIN ACTIVITY: open statistics fragment");
-                        fragmentManager.beginTransaction().show(statisticsFragment).commit();
-                    } else {
-                        Timber.e("MAIN ACTIVITY: create new statistics fragment");
-                        statisticsFragment = new StatisticsFragment();
-                        fragmentManager.beginTransaction().add(R.id.flFragment, statisticsFragment).commit();
-                    }
+                    statisticsFragment = new StatisticsFragment();
+                    Timber.e("MAIN ACTIVITY: create new statistics fragment");
+                    fragmentManager.beginTransaction().add(R.id.flFragment, statisticsFragment).commit();
                     currentFragment = statisticsFragment;
                     return true;
                 case R.id.fragment_bluetooth:
                     fragmentManager.beginTransaction().hide(currentFragment).commit();
-                    if (bluetoothFragment != null) {
-                        fragmentManager.beginTransaction().show(bluetoothFragment).commit();
-                    } else {
-                        bluetoothFragment = new BluetoothFragment();
-                        fragmentManager.beginTransaction().add(R.id.flFragment, bluetoothFragment).commit();
-                    }
+                    bluetoothFragment = new BluetoothFragment();
+                    Timber.e("MAIN ACTIVITY: create new bluetooth fragment");
+                    fragmentManager.beginTransaction().add(R.id.flFragment, bluetoothFragment).commit();
                     currentFragment = bluetoothFragment;
                     return true;
             }
