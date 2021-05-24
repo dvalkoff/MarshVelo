@@ -253,6 +253,7 @@ public class TrackingService extends LifecycleService {
         startForeground(NOTIFICATION_ID, notificationBuilder.build());
     }
 
+
     private PendingIntent getMainActivityPendingIntent() {
         Intent intent  = new Intent(this, MainActivity.class);
         intent.setAction(ACTION_SHOW_TRACKING_FRAGMENT);

@@ -2,6 +2,7 @@ package ru.valkov.trackerapp.ui;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.Manifest;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
@@ -19,6 +20,8 @@ import timber.log.Timber;
 
 
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.ActivityManagerCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -62,6 +65,22 @@ public class MainActivity extends AppCompatActivity {
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.bottomNavigationView);
         navigation.setOnNavigationItemSelectedListener(OnNavigationItemSelectedListener);
 
+
+        requestPerm();
+    }
+
+    protected void requestPerm(){
+        ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
+        ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, 2);
+        ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.ACCESS_BACKGROUND_LOCATION}, 3);
+        ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.BLUETOOTH}, 4);
+        ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.FOREGROUND_SERVICE}, 5);
+        ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE}, 6);
+        ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.BLUETOOTH_ADMIN}, 7);
+        ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.READ_EXTERNAL_STORAGE}, 8);
+        ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.INTERNET}, 9);
+        ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.ACCESS_NOTIFICATION_POLICY}, 10 );
+        ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.FOREGROUND_SERVICE}, 11);
     }
 
     @Override
